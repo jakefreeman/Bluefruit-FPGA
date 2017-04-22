@@ -11,7 +11,7 @@
 -- Description: Recieves button and RGB data from Adafruit Bluefruit
 -- UART friend
 -- 
--- Dependencies: 
+-- Dependencies: 100 MHz clock
 -- 
 -- Revision:
 -- Revision 0.01 - File Created
@@ -34,7 +34,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity bluefruit is
     Port( 
-		clk : in STD_LOGIC;
+		clk : in STD_LOGIC; -- 100 MHz
 		rst	: in STD_LOGIC;
         Rx 	: in STD_LOGIC;
         CTS : out STD_LOGIC;
