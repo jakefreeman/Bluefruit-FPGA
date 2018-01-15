@@ -11,6 +11,9 @@ end bluefruit_tb;
 architecture simulation of bluefruit_tb is
 
 component bluefruit is
+    Generic(
+        clk_freq : INTEGER
+    );
     Port( 
 		clk : in STD_LOGIC;
 		rst	: in STD_LOGIC;
@@ -33,10 +36,11 @@ component bluefruit is
 end component;
 
 --Signal Declarations
-signal clock 	: std_logic := '0';
-signal reset 	: std_logic := '0';
-signal serial	: std_logic := '1';
-signal CTS 		: std_logic := '0';
+signal clock_100MHz	: std_logic := '0';
+signal clock_66MHz	: std_logic := '0';
+signal reset 	    : std_logic := '0';
+signal serial	    : std_logic := '1';
+signal CTS 		    : std_logic := '0';
 
 signal button1	: std_logic := '0';
 signal button2	: std_logic := '0';
@@ -67,27 +71,59 @@ signal Blue		: std_logic_vector(7 downto 0) := "00000000";
 begin
 
 --Component Instantiation
-dut1: bluefruit port map(
-	clk => clock,
-	rst	=> reset,
-    Rx 	=> serial,
-    CTS => CTS,
-    B1 	=> button1,
-    B2 	=> button2,
-    B3 	=> button3,
-    B4 	=> button4,
-    B5 	=> button5,
-    B6 	=> button6,
-    B7 	=> button7,
-    B8 	=> button8,
-    Ro 	=> red,
-    Go 	=> green,
-    Bo 	=> blue
+dut1: bluefruit 
+    generic map(
+        clk_freq => 100000000
+    )
+    port map(
+        clk => clock_100MHz,
+        rst	=> reset,
+        Rx 	=> serial,
+        CTS => CTS,
+        B1 	=> button1,
+        B2 	=> button2,
+        B3 	=> button3,
+        B4 	=> button4,
+        B5 	=> button5,
+        B6 	=> button6,
+        B7 	=> button7,
+        B8 	=> button8,
+        Ro 	=> red,
+        Go 	=> green,
+        Bo 	=> blue
 );
 
+dut2: bluefruit 
+    generic map(
+        clk_freq => 66666667
+    )
+    port map(
+        clk => clock_66MHz,
+        rst	=> reset,
+        Rx 	=> serial,
+        CTS => CTS,
+        B1 	=> open,
+        B2 	=> open,
+        B3 	=> open,
+        B4 	=> open,
+        B5 	=> open,
+        B6 	=> open,
+        B7 	=> open,
+        B8 	=> open,
+        Ro 	=> open,
+        Go 	=> open,
+        Bo 	=> open
+);
+--100MHz clock
 process begin
-	clock <= not clock;
+	clock_100MHz <= not clock_100MHz;
 	wait for 5 ns;
+end process;
+
+--66.667MHz clock
+process begin
+    clock_66Mhz <= not clock_66Mhz;
+    wait for 7.5 ns;
 end process;
 
 process begin

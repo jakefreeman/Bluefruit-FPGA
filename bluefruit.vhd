@@ -18,21 +18,14 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity bluefruit is
+    Generic(
+        clk_freq : INTEGER := 100000000
+    );
     Port( 
 		clk : in STD_LOGIC; -- 100 MHz
 		rst	: in STD_LOGIC;
@@ -54,7 +47,7 @@ entity bluefruit is
 	);
 end bluefruit;
 
-architecture Behavioral of bluefruit is
+architecture synth of bluefruit is
 
 -- Signal Declarations
 signal edge1        : std_logic := '0';
@@ -106,9 +99,14 @@ constant but6	: std_logic_vector(7 downto 0) := "00110110"; -- "6"
 constant but7	: std_logic_vector(7 downto 0) := "00110111"; -- "7"
 constant but8	: std_logic_vector(7 downto 0) := "00111000"; -- "8"
 
+-- Baud Calculation Constants
+constant clocks_per_baud : integer := clk_freq/9600; --Bluefruit uses communicates via 9600 baud serial data
+constant first_shift     : integer := clocks_per_baud + (clocks_per_baud/2);
+
 
 begin
 
+-- Rising edge detector for signal recieved from bluefruit
 process (clk) begin
 	if rising_edge(clk) then
 		edge1 <= Rx;
@@ -117,16 +115,18 @@ process (clk) begin
 end process;
 
 edge3 <= (not edge1 and edge2);
-  
-process (clk, count_reset) begin -- 16-bit counter
-	if (count_reset = '1') then
+
+
+-- Counter for counting clock cycles that determine recieve timing
+process (clk, count_reset) begin
+	if (count_reset = '1' or rst = '1') then
 		count <= "00000000000000000000";
 	elsif rising_edge(clk) then
 		count <= (count + "00000000000000000001");
 	end if;
 end process;
 
---TODO: change times for 9600 Baud, now set for 115200
+-- State machine for shifting in data from RX 
 process (state, edge3, count) begin  -- two state state machine
 	if (state = "01") then
 		if (edge3 = '1') then
@@ -139,39 +139,39 @@ process (state, edge3, count) begin  -- two state state machine
 			count_reset <= '0';
 		end if;
     elsif (state = "10") then
-		if (count = x"03D08") then -- counts to middle of first ascii data bit
+		if (count = first_shift) then -- counts to middle of first ascii data bit
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"065B8") then --  counts to middle of second ascii data bit
+		elsif (count = first_shift + clocks_per_baud) then --  counts to middle of second ascii data bit
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"08E68") then
+		elsif (count = first_shift + (2*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"0B717") then
+		elsif (count = first_shift + (3*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"0DFC7") then
+		elsif (count = first_shift + (4*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"10876") then
+		elsif (count = first_shift + (5*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"13126") then
+		elsif (count = first_shift + (6*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"159D5") then
+		elsif (count = first_shift + (7*clocks_per_baud)) then
 			next_state  <= "10";
 			ce          <= '1';
 			count_reset <= '0';
-		elsif (count = x"18285") then
+		elsif (count = first_shift + (8*clocks_per_baud)) then
 			next_state  <= "01";
 			ce          <= '0';
 			count_reset <= '0';
@@ -207,7 +207,7 @@ process(clk, rst) begin
 			char_count <= "000";
 			button_flag <= '0';
 			color_flag <= '0';
-		elsif (count = x"18285") then -- same as last count
+		elsif (count = first_shift + (8*clocks_per_baud)) then -- same as last count
 			if (ascii = exclam) then
 				char_count <= "000";
 				button_flag <= '0';
@@ -353,4 +353,4 @@ Go <= i_G;
 Bo <= i_B;
 CTS <= '0';			
 			
-end Behavioral;
+end synth;

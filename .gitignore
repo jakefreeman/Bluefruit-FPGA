@@ -1,0 +1,8 @@
+work/*
+*.mpf
+*.cr.mti
+*.wcfg
+Bluefruit-FPGA.*
+*.log
+*.jou
+*.str
