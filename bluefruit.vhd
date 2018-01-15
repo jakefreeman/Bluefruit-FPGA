@@ -15,6 +15,7 @@
 -- 
 -- Revision:
 -- Revision 0.01 - File Created
+-- Revision 0.02 - Updated to use any clock freq. 1/14/2018
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
