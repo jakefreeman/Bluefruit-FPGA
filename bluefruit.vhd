@@ -119,7 +119,7 @@ edge3 <= (not edge1 and edge2);
 
 
 -- Counter for counting clock cycles that determine recieve timing
-process (clk, count_reset) begin
+process (clk, count_reset, rst) begin
 	if (count_reset = '1' or rst = '1') then
 		count <= "00000000000000000000";
 	elsif rising_edge(clk) then

@@ -6,3 +6,4 @@ Bluefruit-FPGA.*
 *.log
 *.jou
 *.str
+.Xil/*
